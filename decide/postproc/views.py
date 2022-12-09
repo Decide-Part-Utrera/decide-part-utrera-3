@@ -18,21 +18,24 @@ class PostProcView(APIView):
 
     def post(self, request):
         """
-         * type: IDENTITY | EQUALITY | WEIGHT
+         * type: IDENTITY | EQUALITY | WEIGHT | DHONT 
          * options: [
             {
              option: str,
              number: int,
              votes: int,
-             ...extraparams
             }
+         * numEscanos: int
            ]
         """
 
         t = request.data.get('type', 'IDENTITY')
         opts = request.data.get('options', [])
+        numEscanos = request.data.get('numEscanos', 0)
 
         if t == 'IDENTITY':
             return self.identity(opts)
+        elif t == 'DHONT':
+            return self.dHont(options=opts, numEscanos=numEscanos)
 
         return Response({})
