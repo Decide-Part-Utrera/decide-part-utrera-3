@@ -236,8 +236,8 @@ class PostProcTestCase(APITestCase):
             'options': [
                 { 'option': 'A', 'number': 1, 'votes': 1000},
                 { 'option': 'B', 'number': 2, 'votes': 1000},
-                { 'option': 'A', 'number': 1, 'votes': 1000},
-                { 'option': 'B', 'number': 2, 'votes': 1000}
+                { 'option': 'C', 'number': 3, 'votes': 1000},
+                { 'option': 'D', 'number': 4, 'votes': 1000}
             ],
             'numEscanos': 20,
             
@@ -246,8 +246,8 @@ class PostProcTestCase(APITestCase):
         expected_result = [
             { 'option': 'A', 'number': 1, 'votes': 1000, 'postproc': 5},
             { 'option': 'B', 'number': 2, 'votes': 1000, 'postproc': 5},
-            { 'option': 'A', 'number': 1, 'votes': 1000, 'postproc': 5},
-            { 'option': 'B', 'number': 2, 'votes': 1000, 'postproc': 5}
+            { 'option': 'C', 'number': 3, 'votes': 1000, 'postproc': 5},
+            { 'option': 'D', 'number': 4, 'votes': 1000, 'postproc': 5}
         ]
 
         response = self.client.post('/postproc/', data, format='json')
@@ -280,6 +280,190 @@ class PostProcTestCase(APITestCase):
             { 'option': 'E', 'number': 5, 'votes': 84126, 'postproc': 0},
             { 'option': 'F', 'number': 6, 'votes': 29428, 'postproc': 0},
             { 'option': 'G', 'number': 7, 'votes': 33333, 'postproc': 0},
+        ]
+
+        response = self.client.post("/postproc/", data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    #Datos simulador
+    def testDHontBorda1(self):
+        data = {
+            'type': 'DHONTBORDA',
+            'options': [
+                { 'option': 'A', 'number': 1, 'votes': [200, 300, 400, 250, 150, 380, 20] },
+                { 'option': 'B', 'number': 2, 'votes': [100, 200, 300, 350, 250, 380, 120] },
+                { 'option': 'C', 'number': 3, 'votes': [1000, 300, 100, 100, 100, 100, 0] },
+                { 'option': 'D', 'number': 4, 'votes': [100, 300, 400, 100, 400, 200, 200] },
+                { 'option': 'E', 'number': 5, 'votes': [100, 400, 150, 450, 250, 150, 200] },
+                { 'option': 'F', 'number': 6, 'votes': [100, 150, 100, 400, 150, 250, 550] },
+                { 'option': 'G', 'number': 7, 'votes': [100, 50, 250, 50, 400, 240, 610] }
+            ],
+            'numEscanos': 50,
+        }
+
+        expected_result = [
+            { 'option': 'C', 'number': 3, 'votes': 10200, 'postproc': 11},
+            { 'option': 'A', 'number': 1, 'votes': 7430, 'postproc': 8},
+            { 'option': 'E', 'number': 5, 'votes': 6900, 'postproc': 7},
+            { 'option': 'D', 'number': 4, 'votes': 6700, 'postproc': 7},
+            { 'option': 'B', 'number': 2, 'votes': 6430, 'postproc': 7},
+            { 'option': 'F', 'number': 6, 'votes': 5200, 'postproc': 5},
+            { 'option': 'G', 'number': 7, 'votes': 4740, 'postproc': 5}
+        ]
+
+        response = self.client.post("/postproc/", data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    #Iguales
+    def testDHontBorda2(self):
+        data = {
+            'type': 'DHONTBORDA',
+            'options': [
+                { 'option': 'A', 'number': 1, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'B', 'number': 2, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'C', 'number': 3, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'D', 'number': 4, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'E', 'number': 5, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'F', 'number': 6, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'G', 'number': 7, 'votes': [100, 100, 100, 100, 100, 100, 100] }
+            ],
+            'numEscanos': 70,
+        }
+
+        expected_result = [
+            { 'option': 'A', 'number': 1, 'votes': 2800, 'postproc': 10 },
+            { 'option': 'B', 'number': 2, 'votes': 2800, 'postproc': 10 },
+            { 'option': 'C', 'number': 3, 'votes': 2800, 'postproc': 10 },
+            { 'option': 'D', 'number': 4, 'votes': 2800, 'postproc': 10 },
+            { 'option': 'E', 'number': 5, 'votes': 2800, 'postproc': 10 },
+            { 'option': 'F', 'number': 6, 'votes': 2800, 'postproc': 10 },
+            { 'option': 'G', 'number': 7, 'votes': 2800, 'postproc': 10 }
+        ]
+
+        response = self.client.post("/postproc/", data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    #Sin escaños
+    def testDHontBorda3(self):
+        data = {
+            'type': 'DHONTBORDA',
+            'options': [
+                { 'option': 'A', 'number': 1, 'votes': [170, 170, 170, 170, 170, 170, 170] },
+                { 'option': 'B', 'number': 2, 'votes': [170, 170, 170, 170, 170, 170, 170] },
+                { 'option': 'C', 'number': 3, 'votes': [170, 170, 170, 170, 170, 170, 170] },
+                { 'option': 'D', 'number': 4, 'votes': [170, 170, 170, 170, 170, 170, 170] },
+                { 'option': 'E', 'number': 5, 'votes': [170, 170, 170, 170, 170, 170, 170] },
+                { 'option': 'F', 'number': 6, 'votes': [170, 170, 170, 170, 170, 170, 170] },
+                { 'option': 'G', 'number': 7, 'votes': [170, 170, 170, 170, 170, 170, 170] }
+            ],
+            'numEscanos': 0,
+        }
+
+        expected_result = [
+            { 'option': 'A', 'number': 1, 'votes': 4760, 'postproc': 0 },
+            { 'option': 'B', 'number': 2, 'votes': 4760, 'postproc': 0 },
+            { 'option': 'C', 'number': 3, 'votes': 4760, 'postproc': 0 },
+            { 'option': 'D', 'number': 4, 'votes': 4760, 'postproc': 0 },
+            { 'option': 'E', 'number': 5, 'votes': 4760, 'postproc': 0 },
+            { 'option': 'F', 'number': 6, 'votes': 4760, 'postproc': 0 },
+            { 'option': 'G', 'number': 7, 'votes': 4760, 'postproc': 0 }
+        ]
+
+        response = self.client.post("/postproc/", data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    #Datos simulador
+    def testImperialiBorda1(self):
+        data = {
+            'type': 'IMPERIALIBORDA',
+            'options': [
+                { 'option': 'A', 'number': 1, 'votes': [610, 240, 400, 50, 250, 50, 100] },
+                { 'option': 'B', 'number': 2, 'votes': [550, 250, 150, 400, 100, 150, 100] },
+                { 'option': 'C', 'number': 3, 'votes': [200, 150, 250, 450, 150, 400, 100] },
+                { 'option': 'D', 'number': 4, 'votes': [200, 200, 400, 100, 400, 300, 100] },
+                { 'option': 'E', 'number': 5, 'votes': [0, 100, 100, 100, 100, 100, 1000] },
+                { 'option': 'F', 'number': 6, 'votes': [120, 380, 250, 350, 300, 200, 100] },
+                { 'option': 'G', 'number': 7, 'votes': [20, 380, 150, 250, 400, 300, 200] }
+            ],
+            'numEscanos': 55,
+        }
+
+        expected_result = [
+            { 'option': 'A', 'number': 1, 'votes': 8860, 'postproc': 11 },
+            { 'option': 'B', 'number': 2, 'votes': 8400, 'postproc': 10 },
+            { 'option': 'F', 'number': 6, 'votes': 7170, 'postproc': 8 },
+            { 'option': 'D', 'number': 4, 'votes': 6900, 'postproc': 8 },
+            { 'option': 'C', 'number': 3, 'votes': 6700, 'postproc': 8 },
+            { 'option': 'G', 'number': 7, 'votes': 6170, 'postproc': 7 },
+            { 'option': 'E', 'number': 5, 'votes': 3000, 'postproc': 3 }
+        ]
+
+        response = self.client.post("/postproc/", data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    #Iguales
+    def testImperialiBorda2(self):
+        data = {
+            'type': 'IMPERIALIBORDA',
+            'options': [
+                { 'option': 'A', 'number': 1, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'B', 'number': 2, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'C', 'number': 3, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'D', 'number': 4, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'E', 'number': 5, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'F', 'number': 6, 'votes': [100, 100, 100, 100, 100, 100, 100] },
+                { 'option': 'G', 'number': 7, 'votes': [100, 100, 100, 100, 100, 100, 100] }
+            ],
+            'numEscanos': 217,
+        }
+
+        expected_result = [
+            { 'option': 'A', 'number': 1, 'votes': 2800, 'postproc': 31 },
+            { 'option': 'B', 'number': 2, 'votes': 2800, 'postproc': 31 },
+            { 'option': 'C', 'number': 3, 'votes': 2800, 'postproc': 31 },
+            { 'option': 'D', 'number': 4, 'votes': 2800, 'postproc': 31 },
+            { 'option': 'E', 'number': 5, 'votes': 2800, 'postproc': 31 },
+            { 'option': 'F', 'number': 6, 'votes': 2800, 'postproc': 31 },
+            { 'option': 'G', 'number': 7, 'votes': 2800, 'postproc': 31 }
+        ]
+
+        response = self.client.post("/postproc/", data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    #Sin escaños
+    def testImperialiBorda3(self):
+        data = {
+            'type': 'IMPERIALIBORDA',
+            'options': [
+                { 'option': 'A', 'number': 1, 'votes': [7000, 7000, 7000] },
+                { 'option': 'B', 'number': 2, 'votes': [7000, 7000, 7000] },
+                { 'option': 'C', 'number': 3, 'votes': [7000, 7000, 7000] }
+            ],
+            'numEscanos': 0,
+        }
+
+        expected_result = [
+            { 'option': 'A', 'number': 1, 'votes': 42000, 'postproc': 0 },
+            { 'option': 'B', 'number': 2, 'votes': 42000, 'postproc': 0 },
+            { 'option': 'C', 'number': 3, 'votes': 42000, 'postproc': 0 }
         ]
 
         response = self.client.post("/postproc/", data, format="json")
