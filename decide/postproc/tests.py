@@ -194,4 +194,96 @@ class PostProcTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
 
         values = response.json()
-        self.assertEqual(values, expected_result)  
+        self.assertEqual(values, expected_result) 
+ 
+    #Datos simulador
+    def testImperiali1(self):
+        data = {
+            'type': 'IMPERIALI',
+            'options': [
+                { 'option': 'A', 'number': 1, 'votes': 52588 },
+                { 'option': 'B', 'number': 2, 'votes': 45682 },
+                { 'option': 'C', 'number': 3, 'votes': 5322 },
+                { 'option': 'D', 'number': 4, 'votes': 12374 },
+                { 'option': 'E', 'number': 5, 'votes': 84126 },
+                { 'option': 'F', 'number': 6, 'votes': 29428 },
+                { 'option': 'G', 'number': 7, 'votes': 33333 },
+            ],
+            'numEscanos': 55,
+        }
+
+        expected_result = [
+            { 'option': 'E', 'number': 5, 'votes': 84126, 'postproc': 18},
+            { 'option': 'A', 'number': 1, 'votes': 52588, 'postproc': 11},
+            { 'option': 'B', 'number': 2, 'votes': 45682, 'postproc': 10},
+            { 'option': 'G', 'number': 7, 'votes': 33333, 'postproc': 7},
+            { 'option': 'F', 'number': 6, 'votes': 29428, 'postproc': 6},
+            { 'option': 'D', 'number': 4, 'votes': 12374, 'postproc': 2},
+            { 'option': 'C', 'number': 3, 'votes': 5322, 'postproc': 1}
+        ]
+
+        response = self.client.post("/postproc/", data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    #Iguales
+    def testImperiali2(self):
+        
+        data = {
+            'type': 'IMPERIALI',
+            'options': [
+                { 'option': 'A', 'number': 1, 'votes': 1000},
+                { 'option': 'B', 'number': 2, 'votes': 1000},
+                { 'option': 'A', 'number': 1, 'votes': 1000},
+                { 'option': 'B', 'number': 2, 'votes': 1000}
+            ],
+            'numEscanos': 20,
+            
+        }
+
+        expected_result = [
+            { 'option': 'A', 'number': 1, 'votes': 1000, 'postproc': 5},
+            { 'option': 'B', 'number': 2, 'votes': 1000, 'postproc': 5},
+            { 'option': 'A', 'number': 1, 'votes': 1000, 'postproc': 5},
+            { 'option': 'B', 'number': 2, 'votes': 1000, 'postproc': 5}
+        ]
+
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    #Sin escaños
+    def testImperiali3(self):
+        data = {
+            'type': 'IMPERIALI',
+            'options': [
+                { 'option': 'A', 'number': 1, 'votes': 52588 },
+                { 'option': 'B', 'number': 2, 'votes': 45682 },
+                { 'option': 'C', 'number': 3, 'votes': 5322 },
+                { 'option': 'D', 'number': 4, 'votes': 12374 },
+                { 'option': 'E', 'number': 5, 'votes': 84126 },
+                { 'option': 'F', 'number': 6, 'votes': 29428 },
+                { 'option': 'G', 'number': 7, 'votes': 33333 },
+            ],
+            'numEscanos': 0,
+        }
+
+        expected_result = [
+            { 'option': 'A', 'number': 1, 'votes': 52588, 'postproc': 0},
+            { 'option': 'B', 'number': 2, 'votes': 45682, 'postproc': 0},
+            { 'option': 'C', 'number': 3, 'votes': 5322, 'postproc': 0},
+            { 'option': 'D', 'number': 4, 'votes': 12374, 'postproc': 0},
+            { 'option': 'E', 'number': 5, 'votes': 84126, 'postproc': 0},
+            { 'option': 'F', 'number': 6, 'votes': 29428, 'postproc': 0},
+            { 'option': 'G', 'number': 7, 'votes': 33333, 'postproc': 0},
+        ]
+
+        response = self.client.post("/postproc/", data, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
