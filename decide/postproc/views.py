@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+import math
 
 
 class PostProcView(APIView):
@@ -35,9 +36,57 @@ class PostProcView(APIView):
 
         return Response(options)
 
+
+    def imperiali(self, numEscanos, options):
+        votosTotales = 0
+        for x in options:
+            votosTotales += x['votes']
+
+        if votosTotales > 0 and numEscanos > 0:
+            if votosTotales>(numEscanos+2):
+                q = round(votosTotales / (numEscanos+2), 0)
+                
+                escanosAsig = 0
+                for x in options:
+                    escanosSuelo = math.trunc(x['votes']/q)
+                    x.update({'postproc' : escanosSuelo})
+                    escanosAsig += x['postproc']               
+
+                while(escanosAsig < numEscanos):
+                    for x in options:
+                        x.update({ 
+                            'escanosRes' : x['votes'] - (q * x['postproc'])})
+
+                    options.sort(key=lambda x : -x['escanosRes'])
+
+                    opcionMasVotosResiduo = options[0]
+                    opcionMasVotosResiduo.update({
+                    'postproc' : opcionMasVotosResiduo['postproc'] + 1})
+                    escanosAsig += 1
+
+                    for i in options:
+                        i.pop('escanosRes')
+                options.sort(key=lambda x : -x['postproc'])
+            else:
+                escanosAsigQ= 0
+                for x in options:
+                    escanosQ= math.trunc(numEscanos/ len(options))
+                    x.update({'postproc' : escanosQ}) 
+                    escanosAsigQ += x['postproc']
+                
+                if escanosAsigQ < numEscanos:
+                    for x in options:
+                        options.sort(key=lambda x : -x['votes'])
+                    options[0].update({'postproc' : options[0]['postproc']+1})
+            return Response(options)
+        else:
+            for x in options:
+                x.update({'postproc' : 0})
+            return Response(options)
+
     def post(self, request):
         """
-         * type: IDENTITY | EQUALITY | WEIGHT | DHONT 
+         * type: IDENTITY | EQUALITY | WEIGHT | DHONT | IMPERIALI
          * options: [
             {
              option: str,
@@ -56,5 +105,7 @@ class PostProcView(APIView):
             return self.identity(opts)
         elif t == 'DHONT':
             return self.dHont(options=opts, numEscanos=numEscanos)
+        elif t == 'IMPERIALI':
+            return self.imperiali(numEscanos=numEscanos, options=opts)
 
         return Response({})
