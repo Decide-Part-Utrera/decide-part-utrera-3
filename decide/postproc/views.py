@@ -36,6 +36,18 @@ class PostProcView(APIView):
 
         return Response(options)
 
+    def borda(self, options):
+        res = options
+        for op in res:
+            votosTotal = 0
+            opciones = len(op['votes'])
+            for i in range(0, opciones):
+                votosOpcion = op['votes'][i]
+                votosBorda = votosOpcion * (opciones - i)
+                votosTotal += votosBorda
+            op['votes'] = votosTotal
+        res.sort(key=lambda x: -x['votes'])
+        return res
 
     def imperiali(self, numEscanos, options):
         votosTotales = 0
@@ -86,7 +98,7 @@ class PostProcView(APIView):
 
     def post(self, request):
         """
-         * type: IDENTITY | EQUALITY | WEIGHT | DHONT | IMPERIALI
+         * type: IDENTITY | EQUALITY | WEIGHT | DHONT | IMPERIALI | DHONTBORDA | IMPERIALIBORDA
          * options: [
             {
              option: str,
@@ -107,5 +119,9 @@ class PostProcView(APIView):
             return self.dHont(options=opts, numEscanos=numEscanos)
         elif t == 'IMPERIALI':
             return self.imperiali(numEscanos=numEscanos, options=opts)
+        elif t == 'DHONTBORDA':
+            return self.dHont(options=self.borda(options=opts), numEscanos=numEscanos)
+        elif t == 'IMPERIALIBORDA':
+            return self.imperiali(options=self.borda(options=opts), numEscanos=numEscanos)
 
         return Response({})
