@@ -18,11 +18,6 @@ class PostProcView(APIView):
         return Response(out)
 
 
-        #Primer for: Se añade un campo para el contador de escaños asignados a cada opción.
-        #Segundo for: Para cada escaño, se recorren todas las opciones, usando la fórmula de d'Hont: número de votos a esa opción / (número de escaños asignados a esa opción + 1)
-        #Lista de tamaño igual al número de opciones. Representa el recuento al aplicar la fórmula de cada opción, ordenados en la misma forma.
-        #Se obtiene el índice del máximo valor en la lista de recuento de votos, es decir, el índice del ganador del escaño
-        #Al estar ordenadas de la misma forma, en la posicion del ganador se le suma 1 escaño
     def dHont(self, options, numEscanos):
         for option in options:
             option['postproc'] = 0
@@ -35,6 +30,16 @@ class PostProcView(APIView):
             options[ganador]['postproc'] += 1
 
         return Response(options)
+
+    def multiPreguntas(self, questions):
+        for question in questions:
+            for opt in question:
+                opt['postproc'] = opt['votes']
+
+            question.sort(key=lambda x: -x['postproc'])
+
+        return Response(questions)
+
 
     def borda(self, options):
         res = options
@@ -98,7 +103,7 @@ class PostProcView(APIView):
 
     def post(self, request):
         """
-         * type: IDENTITY | EQUALITY | WEIGHT | DHONT | IMPERIALI | DHONTBORDA | IMPERIALIBORDA
+         * type: IDENTITY | EQUALITY | WEIGHT | DHONT | IMPERIALI | DHONTBORDA | IMPERIALIBORDA | MULTIPREGUNTAS 
          * options: [
             {
              option: str,
@@ -123,5 +128,8 @@ class PostProcView(APIView):
             return self.dHont(options=self.borda(options=opts), numEscanos=numEscanos)
         elif t == 'IMPERIALIBORDA':
             return self.imperiali(options=self.borda(options=opts), numEscanos=numEscanos)
+        elif t == 'MULTIPREGUNTAS':
+            questions = request.data.get('questions', [])
+            return self.multiPreguntas(questions)
 
         return Response({})

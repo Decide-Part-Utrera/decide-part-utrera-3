@@ -36,7 +36,8 @@ class Voting(models.Model):
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
 
-    tipo_votacion = [("IDENTITY", "IDENTITY"), ("DHONT", "DHONT"),("IMPERIALI", "IMPERIALI"), ("IMPERIALIBORDA", "IMPERIALIBORDA"), ("DHONTBORDA", "DHONTBORDA")]
+    tipo_votacion = [("IDENTITY", "IDENTITY"), ("DHONT", "DHONT"),("IMPERIALI", "IMPERIALI"), ("IMPERIALIBORDA", "IMPERIALIBORDA"), ("DHONTBORDA", "DHONTBORDA"),
+    ("MULTIPREGUNTAS", "MULTIPREGUNTAS")]
 
     tipo = models.CharField(choices=tipo_votacion, max_length=20, default="IMPERIALI", verbose_name='Count method')
 
