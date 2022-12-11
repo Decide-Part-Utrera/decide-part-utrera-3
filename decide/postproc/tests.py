@@ -194,8 +194,8 @@ class PostProcTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
 
         values = response.json()
-        self.assertEqual(values, expected_result) 
- 
+        self.assertEqual(values, expected_result)
+
     #Datos simulador
     def testImperiali1(self):
         data = {
