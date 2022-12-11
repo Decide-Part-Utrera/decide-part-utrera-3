@@ -196,6 +196,7 @@ class PostProcTestCase(APITestCase):
         values = response.json()
         self.assertEqual(values, expected_result)
 
+
     #Datos simulador
     def testImperiali1(self):
         data = {
@@ -471,3 +472,252 @@ class PostProcTestCase(APITestCase):
 
         values = response.json()
         self.assertEqual(values, expected_result)
+
+    def test_multi_preguntas1(self):
+        data = {
+            'type': 'MULTIPREGUNTAS',
+            'questions': [
+                [
+                    { 'option': 'Option 1', 'number': 1, 'votes': 17 },
+                    { 'option': 'Option 2', 'number': 2, 'votes': 14 },
+                    { 'option': 'Option 3', 'number': 3, 'votes': 10 },
+                    { 'option': 'Option 4', 'number': 4, 'votes': 19 }
+                ],
+                [
+                    { 'option': 'Option 1', 'number': 1, 'votes': 0 },
+                    { 'option': 'Option 2', 'number': 2, 'votes': 12 },
+                    { 'option': 'Option 3', 'number': 3, 'votes': 26},
+                    { 'option': 'Option 4', 'number': 4, 'votes': 9 },
+                    { 'option': 'Option 5', 'number': 5, 'votes': 20 }
+                ],
+            ]
+        }
+
+        expected_result = [
+            [
+                    { 'option': 'Option 4', 'number': 4, 'votes': 19, 'postproc': 19 },
+                    { 'option': 'Option 1', 'number': 1, 'votes': 17, 'postproc': 17 },
+                    { 'option': 'Option 2', 'number': 2, 'votes': 14, 'postproc': 14 },
+                    { 'option': 'Option 3', 'number': 3, 'votes': 10, 'postproc': 10 }
+                ],
+                [
+                    { 'option': 'Option 3', 'number': 3, 'votes': 26, 'postproc': 26 },
+                    { 'option': 'Option 5', 'number': 5, 'votes': 20, 'postproc': 20 },
+                    { 'option': 'Option 2', 'number': 2, 'votes': 12, 'postproc': 12 },
+                    { 'option': 'Option 4', 'number': 4, 'votes': 9, 'postproc': 9 },
+                    { 'option': 'Option 1', 'number': 1, 'votes': 0, 'postproc': 0 }
+                ],
+        ]
+
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+        
+    def test_multi_preguntas2(self):
+        data = {
+            'type': 'MULTIPREGUNTAS',
+            'questions': [
+                [
+                    { 'option': 'Option 1', 'number': 1, 'votes': 22 },
+                    { 'option': 'Option 2', 'number': 2, 'votes': 26 },
+                    { 'option': 'Option 3', 'number': 3, 'votes': 23 }
+                ],
+                [
+                    { 'option': 'Option 1', 'number': 1, 'votes': 1 },
+                    { 'option': 'Option 2', 'number': 2, 'votes': 4 },
+                    { 'option': 'Option 3', 'number': 3, 'votes': 3 },
+                    { 'option': 'Option 4', 'number': 4, 'votes': 1 },
+                    { 'option': 'Option 5', 'number': 5, 'votes': 2 },
+                    { 'option': 'Option 6', 'number': 6, 'votes': 0 }
+                ],
+                [
+                    { 'option': 'Option 1', 'number': 1, 'votes': 3 },
+                    { 'option': 'Option 2', 'number': 2, 'votes': 0 },
+                    { 'option': 'Option 3', 'number': 3, 'votes': 10 },
+                    { 'option': 'Option 4', 'number': 4, 'votes': 20 }
+                ],
+            ]
+        }
+
+        expected_result = [
+            [
+                    { 'option': 'Option 2', 'number': 2, 'votes': 26, 'postproc': 26 },
+                    { 'option': 'Option 3', 'number': 3, 'votes': 23, 'postproc': 23 },
+                    { 'option': 'Option 1', 'number': 1, 'votes': 22, 'postproc': 22 }
+                ],
+                [
+                    { 'option': 'Option 2', 'number': 2, 'votes': 4, 'postproc': 4 },
+                    { 'option': 'Option 3', 'number': 3, 'votes': 3, 'postproc': 3 },
+                    { 'option': 'Option 5', 'number': 5, 'votes': 2, 'postproc': 2 },
+                    { 'option': 'Option 1', 'number': 1, 'votes': 1, 'postproc': 1 },
+                    { 'option': 'Option 4', 'number': 4, 'votes': 1, 'postproc': 1 },
+                    { 'option': 'Option 6', 'number': 6, 'votes': 0, 'postproc': 0 }
+                ],
+                [
+                    { 'option': 'Option 4', 'number': 4, 'votes': 20, 'postproc': 20 },
+                    { 'option': 'Option 3', 'number': 3, 'votes': 10, 'postproc': 10 },
+                    { 'option': 'Option 1', 'number': 1, 'votes': 3, 'postproc': 3 },
+                    { 'option': 'Option 2', 'number': 2, 'votes': 0, 'postproc': 0 }
+                ],
+        ]
+          
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+        
+        #test con preguntas vacías
+    def test_multi_preguntas3(self):
+        data = {
+            'type': 'MULTIPREGUNTAS',
+            'questions': [
+                [  
+                ],
+                [  
+                ],
+            ]
+        }
+
+        expected_result = [
+            [   
+                ],
+                [  
+                ],
+        ]
+        
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+        
+    def test_multi_preguntas4(self):
+        data = {
+            'type': 'MULTIPREGUNTAS',
+            'questions': [
+                [
+                    { 'option': 'Verde', 'number': 1, 'votes': 30 },
+                    { 'option': 'Rojo', 'number': 2, 'votes': 20 },
+                    { 'option': 'Blanco', 'number': 3, 'votes': 4 },
+                    { 'option': 'Negro', 'number': 4, 'votes': 10 }
+                ],
+                [
+                    { 'option': 'Betis', 'number': 1, 'votes': 20 },
+                    { 'option': 'Sevilla', 'number': 2, 'votes': 0 },
+                    { 'option': 'Almeria', 'number': 3, 'votes': 5 },
+                    { 'option': 'Cadiz', 'number': 4, 'votes': 3 },
+                    { 'option': 'Utrera', 'number': 5, 'votes': 10 }
+                ],
+            ]
+        }
+
+        expected_result = [
+            [
+                    { 'option': 'Verde', 'number': 1, 'votes': 30, 'postproc': 30 },
+                    { 'option': 'Rojo', 'number': 2, 'votes': 20, 'postproc': 20 },
+                    { 'option': 'Negro', 'number': 4, 'votes': 10, 'postproc': 10},
+                    { 'option': 'Blanco', 'number': 3, 'votes': 4, 'postproc': 4 }
+                ],
+                [
+                    { 'option': 'Betis', 'number': 1, 'votes': 20, 'postproc': 20 },
+                    { 'option': 'Utrera', 'number': 5, 'votes': 10, 'postproc': 10 },
+                    { 'option': 'Almeria', 'number': 3, 'votes': 5, 'postproc': 5},
+                    { 'option': 'Cadiz', 'number': 4, 'votes': 3, 'postproc': 3 },
+                    { 'option': 'Sevilla', 'number': 2, 'votes': 0, 'postproc': 0 }
+                ],
+        ]
+        
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    def test_multi_preguntas5(self):
+        data = {
+            'type': 'MULTIPREGUNTAS',
+            'questions': [
+                [
+                    { 'option': 'AMN', 'number': 1, 'votes': 10 },
+                    { 'option': 'CCG', 'number': 2, 'votes': 10 },
+                    { 'option': 'GPF', 'number': 3, 'votes': 10 }
+                ],
+                [
+                    { 'option': '1', 'number': 1, 'votes': 0 },
+                    { 'option': '2', 'number': 2, 'votes': 0 },
+                    { 'option': '3', 'number': 3, 'votes': 0 },
+                    { 'option': '4', 'number': 4, 'votes': 0 }
+                ],
+            ]
+        }
+
+        expected_result = [
+            [
+                    { 'option': 'AMN', 'number': 1, 'votes': 10, 'postproc': 10 },
+                    { 'option': 'CCG', 'number': 2, 'votes': 10, 'postproc': 10 },
+                    { 'option': 'GPF', 'number': 3, 'votes': 10, 'postproc': 10 }
+                ],
+                [
+                    { 'option': '1', 'number': 1, 'votes': 0, 'postproc': 0 },
+                    { 'option': '2', 'number': 2, 'votes': 0, 'postproc': 0 },
+                    { 'option': '3', 'number': 3, 'votes': 0, 'postproc': 0 },
+                    { 'option': '4', 'number': 4, 'votes': 0, 'postproc': 0 }
+                ],
+        ]
+        
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    def test_multi_preguntas6(self):
+        data = {
+            'type': 'MULTIPREGUNTAS',
+            'questions': [
+                [
+                    { 'option': 'ANGEL', 'number': 1, 'votes': 20 },
+                    { 'option': 'GINES', 'number': 2, 'votes': 10 }
+                ],
+                [
+                    { 'option': 'CARLOS', 'number': 1, 'votes': 11 },
+                    { 'option': 'ANA', 'number': 2, 'votes': 9}
+                ],
+                [
+                    { 'option': 'SERGIO', 'number': 1, 'votes': 14 },
+                    { 'option': 'ENRIQUE', 'number': 2, 'votes': 16 }
+                ],
+                [
+                    { 'option': 'ALBA', 'number': 1, 'votes': 20 },
+                    { 'option': 'CARMEN', 'number': 2, 'votes': 0 }
+                ],
+            ]
+        }
+
+        expected_result = [
+            [
+                    { 'option': 'ANGEL', 'number': 1, 'votes': 20, 'postproc': 20 },
+                    { 'option': 'GINES', 'number': 2, 'votes': 10, 'postproc': 10 }
+                ],
+                [
+                    { 'option': 'CARLOS', 'number': 1, 'votes': 11, 'postproc': 11 },
+                    { 'option': 'ANA', 'number': 2, 'votes': 9, 'postproc': 9 }
+                ],
+                [
+                    { 'option': 'ENRIQUE', 'number': 2, 'votes': 16, 'postproc': 16 },
+                    { 'option': 'SERGIO', 'number': 1, 'votes': 14, 'postproc': 14}
+                ],
+                [
+                    { 'option': 'ALBA', 'number': 1, 'votes': 20, 'postproc': 20 },
+                    { 'option': 'CARMEN', 'number': 2, 'votes': 0, 'postproc': 0 }
+                ],
+        ]
+        
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result) 
