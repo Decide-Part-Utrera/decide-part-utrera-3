@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+import math
 
 
 class PostProcView(APIView):
@@ -114,6 +115,7 @@ class PostProcView(APIView):
 
         t = request.data.get('type', 'IDENTITY')
         opts = request.data.get('options', [])
+        numEscanos = request.data.get('numEscanos', 0)
 
         if t == 'IDENTITY':
             return self.identity(opts)
