@@ -36,8 +36,8 @@ class Voting(models.Model):
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
 
-    tipo_votacion = [("IDENTITY", "IDENTITY"), ("DHONT", "DHONT"),("IMPERIALI", "IMPERIALI"), ("IMPERIALIBORDA", "IMPERIALIBORDA"), ("DHONTBORDA", "DHONTBORDA"),
-    ("MULTIPREGUNTAS", "MULTIPREGUNTAS")]
+    tipo_votacion = [("IDENTITY", "IDENTITY"), ("DHONT", "DHONT"),("IMPERIALI", "IMPERIALI"),
+    ("IMPERIALIBORDA", "IMPERIALIBORDA"), ("DHONTBORDA", "DHONTBORDA"), ("MULTIPREGUNTAS", "MULTIPREGUNTAS")]
 
     tipo = models.CharField(choices=tipo_votacion, max_length=20, default="IMPERIALI", verbose_name='Count method')
 
@@ -120,7 +120,7 @@ class Voting(models.Model):
                 'votes': votes
             })
 
-        data = { 'type': self.tipo, 'options': opts, 'numEscanos': self.numEscanos}
+        data = { 'type': 'IDENTITY', 'options': opts }
         postp = mods.post('postproc', json=data)
 
         self.postproc = postp

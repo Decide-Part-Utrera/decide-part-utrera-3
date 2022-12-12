@@ -1,6 +1,5 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-import math
 
 
 class PostProcView(APIView):
@@ -16,7 +15,6 @@ class PostProcView(APIView):
 
         out.sort(key=lambda x: -x['postproc'])
         return Response(out)
-
 
     def dHont(self, options, numEscanos):
         for option in options:
@@ -109,14 +107,13 @@ class PostProcView(APIView):
              option: str,
              number: int,
              votes: int,
+             ...extraparams
             }
-         * numEscanos: int
            ]
         """
 
         t = request.data.get('type', 'IDENTITY')
         opts = request.data.get('options', [])
-        numEscanos = request.data.get('numEscanos', 0)
 
         if t == 'IDENTITY':
             return self.identity(opts)
@@ -131,5 +128,6 @@ class PostProcView(APIView):
         elif t == 'MULTIPREGUNTAS':
             questions = request.data.get('questions', [])
             return self.multiPreguntas(questions)
+
 
         return Response({})
