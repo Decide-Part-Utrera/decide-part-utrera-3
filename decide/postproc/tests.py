@@ -815,7 +815,7 @@ class PostProcTestCase(APITestCase):
     def test_hare_03(self):
         data = {
             'type': 'HARE',
-            'seats': 21,
+            'numEscanos': 21,
             'options': [
                 { 'option': 'Option 1', 'number': 1, 'votes': 2510 },
                 { 'option': 'Option 2', 'number': 2, 'votes': 6540 },
