@@ -130,7 +130,7 @@ class PostProcView(APIView):
         m = sum([opt['votes'] for opt in options])
         q = round(m/numEscanos, 3)
 
-        return self.function_hare_droop(options, numEscanos, q, e, r. sum_e, out)
+        return self.function_hare_droop(options, numEscanos, q, e, r, sum_e, out)
 
 
     def droop(self, options, numEscanos):
