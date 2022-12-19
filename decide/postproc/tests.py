@@ -723,3 +723,123 @@ class PostProcTestCase(APITestCase):
         values = response.json()
         self.assertEqual(values, expected_result) 
 
+    def test_hare(self):
+        data = {
+            'type': 'HARE',
+            'numEscanos': 21,
+            'options': [
+                { 'option': 'Option 2', 'number': 1, 'votes': 311000 },
+                { 'option': 'Option 4', 'number': 2, 'votes': 73000 },
+                { 'option': 'Option 1', 'number': 3, 'votes': 391000 },
+                { 'option': 'Option 5', 'number': 4, 'votes': 27000 },
+                { 'option': 'Option 3', 'number': 5, 'votes': 184000 },
+                { 'option': 'Option 7', 'number': 6, 'votes': 2000 },
+                { 'option': 'Option 6', 'number': 7, 'votes': 12000 },
+            ]
+        }
+
+        expected_result = [
+            { 'option': 'Option 1', 'number': 3, 'votes': 391000, 'postproc': 8 },
+            { 'option': 'Option 2', 'number': 1, 'votes': 311000, 'postproc': 6 },
+            { 'option': 'Option 3', 'number': 5, 'votes': 184000, 'postproc': 4 },
+            { 'option': 'Option 4', 'number': 2, 'votes': 73000, 'postproc': 2 },
+            { 'option': 'Option 5', 'number': 4, 'votes': 27000, 'postproc': 1 },
+            { 'option': 'Option 6', 'number': 7, 'votes': 12000, 'postproc': 0 },
+            { 'option': 'Option 7', 'number': 6, 'votes': 2000, 'postproc': 0 },
+        ]
+
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    def test_hare_01(self):
+
+        data = {
+            'type': 'HARE',
+            'numEscanos': 21,
+            'options': [
+                { 'option': 'Option 1', 'number': 1, 'votes': 264793 },
+                { 'option': 'Option 2', 'number': 2, 'votes': 654046 },
+            ]
+            
+        }
+
+        expected_result = [
+
+            { 'option': 'Option 2', 'number': 2, 'votes': 654046, 'postproc': 15 },
+            { 'option': 'Option 1', 'number': 1, 'votes': 264793, 'postproc': 6 },
+            
+        ]
+
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+    
+    def test_hare_02(self):
+        data = {
+            'type': 'HARE',
+            'numEscanos': 21,
+            'options': [
+                { 'option': 'Option 1', 'number': 1, 'votes': 2510 },
+                { 'option': 'Option 2', 'number': 2, 'votes': 300 },
+                { 'option': 'Option 3', 'number': 3, 'votes': 245034 },
+                { 'option': 'Option 4', 'number': 4, 'votes': 200001 },
+                { 'option': 'Option 5', 'number': 5, 'votes': 14 },
+                { 'option': 'Option 6', 'number': 6, 'votes': 20145 },
+            ]
+            
+        }
+
+        expected_result = [
+            { 'option': 'Option 3', 'number': 3, 'votes': 245034, 'postproc': 11 },
+            { 'option': 'Option 4', 'number': 4, 'votes': 200001, 'postproc': 9 },
+            { 'option': 'Option 6', 'number': 6, 'votes': 20145, 'postproc': 1 },
+            { 'option': 'Option 1', 'number': 1, 'votes': 2510, 'postproc': 0 },
+            { 'option': 'Option 2', 'number': 2, 'votes': 300, 'postproc': 0 }, 
+            { 'option': 'Option 5', 'number': 5, 'votes': 14, 'postproc': 0 },
+            
+        ]
+        
+
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+
+    def test_hare_03(self):
+        data = {
+            'type': 'HARE',
+            'seats': 21,
+            'options': [
+                { 'option': 'Option 1', 'number': 1, 'votes': 2510 },
+                { 'option': 'Option 2', 'number': 2, 'votes': 6540 },
+                { 'option': 'Option 3', 'number': 3, 'votes': 0 },
+                { 'option': 'Option 4', 'number': 4, 'votes': 12046 },
+                { 'option': 'Option 5', 'number': 5, 'votes': 14 },
+                { 'option': 'Option 6', 'number': 6, 'votes': 20145 },
+            ]
+
+        }
+
+        expected_result = [
+            { 'option': 'Option 6', 'number': 6, 'votes': 20145, 'postproc': 10 },
+            { 'option': 'Option 4', 'number': 4, 'votes': 12046, 'postproc': 6 },
+            { 'option': 'Option 2', 'number': 2, 'votes': 6540, 'postproc': 4 },
+            { 'option': 'Option 1', 'number': 1, 'votes': 2510, 'postproc': 1 },
+            { 'option': 'Option 5', 'number': 5, 'votes': 14, 'postproc': 0 },
+            { 'option': 'Option 3', 'number': 3, 'votes': 0, 'postproc': 0 },
+            
+            
+        ]
+
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
