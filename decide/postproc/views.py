@@ -101,14 +101,7 @@ class PostProcView(APIView):
                 x.update({'postproc' : 0})
             return Response(options)
 
-    def hare(self, options, numEscanos):
-        out = []
-
-        e, r = [], []
-        sum_e = 0
-        m = sum([opt['votes'] for opt in options])
-        q = round(m/numEscanos, 3)
-
+    def function_hare_droop(self, options, numEscanos, q, e, r, sum_e, out):
         for i, opt in enumerate(options):
             ei = math.floor(opt['votes'] / q)
             ri = opt['votes'] - q*ei
@@ -128,6 +121,27 @@ class PostProcView(APIView):
 
         out.sort(key=lambda x: (-x['postproc'], -x['votes']))
         return Response(out)
+
+    def hare(self, options, numEscanos):
+        out = []
+
+        e, r = [], []
+        sum_e = 0
+        m = sum([opt['votes'] for opt in options])
+        q = round(m/numEscanos, 3)
+
+        return self.function_hare_droop(options, numEscanos, q, e, r, sum_e, out)
+
+
+    def droop(self, options, numEscanos):
+        out = []
+
+        e, r = [], []
+        sum_e = 0
+        m = sum([opt['votes'] for opt in options])
+        q = round(1 + m / (numEscanos + 1))
+
+        return self.function_hare_droop(options, numEscanos, q, e, r, sum_e, out)
 
     def post(self, request):
         """
@@ -158,6 +172,8 @@ class PostProcView(APIView):
             return self.imperiali(options=self.borda(options=opts), numEscanos=numEscanos)
         elif t == 'HARE':
             return self.hare(options=opts, numEscanos=numEscanos)
+        elif t == 'DROOP':
+            return self.droop(options=opts, numEscanos=numEscanos)
         elif t == 'MULTIPREGUNTAS':
             questions = request.data.get('questions', [])
             return self.multiPreguntas(questions)
