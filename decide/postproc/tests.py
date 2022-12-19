@@ -816,8 +816,8 @@ class TestPruebaDHont(StaticLiveServerTestCase):
         # self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
         # self.driver.find_element(By.ID, "q2").click()
         # self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
-        '''
-        '''
+'''
+'''
         # response = self.driver.get(f'{self.live_server_url}/admin/')
         # self.driver.find_element(By.ID, "id_username").send_keys('decide')
         # self.driver.find_element(By.ID, "id_password").send_keys('complexpassword')
@@ -880,7 +880,7 @@ class TestPruebaDHont(StaticLiveServerTestCase):
         # self.driver.find_element(By.NAME, "index").click()
         # self.driver.find_element(By.CSS_SELECTOR, "a:nth-child(4)").click()
         # self.driver.close()
-        '''
+'''
         response = self.driver.get(f'{self.live_server_url}/visualizer/{voting1.id}/')
         vState= self.driver.find_element(By.TAG_NAME,"h2").text
         self.assertTrue(vState, "Votación en curso")
