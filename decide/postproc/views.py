@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from collections import Counter
 import math
+from math import floor
 
 
 class PostProcView(APIView):
@@ -54,51 +56,84 @@ class PostProcView(APIView):
         return res
 
     def imperiali(self, numEscanos, options):
+        res = []
+        escanos_cociente = []
+        residuos = []
+        sum_e = 0
+        votes = 0
         votosTotales = 0
         for x in options:
             votosTotales += x['votes']
-
         if votosTotales > 0 and numEscanos > 0:
-            if votosTotales>(numEscanos+2):
-                q = round(votosTotales / (numEscanos+2), 0)
-                
-                escanosAsig = 0
-                for x in options:
-                    escanosSuelo = math.trunc(x['votes']/q)
-                    x.update({'postproc' : escanosSuelo})
-                    escanosAsig += x['postproc']               
+            for option in options:
+                votes += option['votes']
+            cociente = votes / (numEscanos + 2)
 
-                while(escanosAsig < numEscanos):
-                    for x in options:
-                        x.update({ 
-                            'escanosRes' : x['votes'] - (q * x['postproc'])})
+            for i, option, in enumerate(options):
+                ei = floor(option['votes']/cociente)
+                ri = option['votes'] - cociente * ei
+                escanos_cociente .append(ei)
+                residuos.append((ri,i))
+                sum_e += ei
 
-                    options.sort(key=lambda x : -x['escanosRes'])
+            free_seats = numEscanos - sum_e
+            residuos.sort(key = lambda x: -x[0])
+            best_r_index = Counter(i for _, i in (residuos*free_seats)[:free_seats])
+            
+            for i, option in enumerate(options):
+                res.append({
+                    **option,
+                    'postproc': escanos_cociente [i] + best_r_index[i] if i in best_r_index else escanos_cociente [i],
+                })
 
-                    opcionMasVotosResiduo = options[0]
-                    opcionMasVotosResiduo.update({
-                    'postproc' : opcionMasVotosResiduo['postproc'] + 1})
-                    escanosAsig += 1
-
-                    for i in options:
-                        i.pop('escanosRes')
-                options.sort(key=lambda x : -x['postproc'])
-            else:
-                escanosAsigQ= 0
-                for x in options:
-                    escanosQ= math.trunc(numEscanos/ len(options))
-                    x.update({'postproc' : escanosQ}) 
-                    escanosAsigQ += x['postproc']
-                
-                if escanosAsigQ < numEscanos:
-                    for x in options:
-                        options.sort(key=lambda x : -x['votes'])
-                    options[0].update({'postproc' : options[0]['postproc']+1})
-            return Response(options)
+            res.sort(key=lambda x: (-x['postproc'], -x['votes']))
+            return Response(res)
         else:
             for x in options:
                 x.update({'postproc' : 0})
             return Response(options)
+
+    def function_hare_droop(self, options, numEscanos, q, e, r, sum_e, out):
+        for i, opt in enumerate(options):
+            ei = math.floor(opt['votes'] / q)
+            ri = opt['votes'] - q*ei
+            e.append(ei)
+            r.append((ri, i))
+            sum_e += ei
+
+        k = numEscanos - sum_e
+        r.sort(key = lambda x: -x[0])
+        best_r_index = Counter(i for _, i in (r*k)[:k])
+        
+        for i, opt in enumerate(options):
+            out.append({
+                **opt,
+                'postproc': e[i] + best_r_index[i] if i in best_r_index else e[i],
+            })
+
+        out.sort(key=lambda x: (-x['postproc'], -x['votes']))
+        return Response(out)
+
+    def hare(self, options, numEscanos):
+        out = []
+
+        e, r = [], []
+        sum_e = 0
+        m = sum([opt['votes'] for opt in options])
+        q = round(m/numEscanos, 3)
+
+        return self.function_hare_droop(options, numEscanos, q, e, r, sum_e, out)
+
+
+    def droop(self, options, numEscanos):
+        out = []
+
+        e, r = [], []
+        sum_e = 0
+        m = sum([opt['votes'] for opt in options])
+        q = round(1 + m / (numEscanos + 1))
+
+        return self.function_hare_droop(options, numEscanos, q, e, r, sum_e, out)
 
     def post(self, request):
         """
@@ -127,6 +162,10 @@ class PostProcView(APIView):
             return self.dHont(options=self.borda(options=opts), numEscanos=numEscanos)
         elif t == 'IMPERIALIBORDA':
             return self.imperiali(options=self.borda(options=opts), numEscanos=numEscanos)
+        elif t == 'HARE':
+            return self.hare(options=opts, numEscanos=numEscanos)
+        elif t == 'DROOP':
+            return self.droop(options=opts, numEscanos=numEscanos)
         elif t == 'MULTIPREGUNTAS':
             questions = request.data.get('questions', [])
             return self.multiPreguntas(questions)
