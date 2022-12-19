@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from collections import Counter
 import math
+from math import floor
 
 
 class PostProcView(APIView):
@@ -55,47 +56,38 @@ class PostProcView(APIView):
         return res
 
     def imperiali(self, numEscanos, options):
+        res = []
+        escanos_cociente = []
+        residuos = []
+        sum_e = 0
+        votes = 0
         votosTotales = 0
         for x in options:
             votosTotales += x['votes']
-
         if votosTotales > 0 and numEscanos > 0:
-            if votosTotales>(numEscanos+2):
-                q = round(votosTotales / (numEscanos+2), 0)
-                
-                escanosAsig = 0
-                for x in options:
-                    escanosSuelo = math.trunc(x['votes']/q)
-                    x.update({'postproc' : escanosSuelo})
-                    escanosAsig += x['postproc']               
+            for option in options:
+                votes += option['votes']
+            cociente = votes / (numEscanos + 2)
 
-                while(escanosAsig < numEscanos):
-                    for x in options:
-                        x.update({ 
-                            'escanosRes' : x['votes'] - (q * x['postproc'])})
+            for i, option, in enumerate(options):
+                ei = floor(option['votes']/cociente)
+                ri = option['votes'] - cociente * ei
+                escanos_cociente .append(ei)
+                residuos.append((ri,i))
+                sum_e += ei
 
-                    options.sort(key=lambda x : -x['escanosRes'])
+            free_seats = numEscanos - sum_e
+            residuos.sort(key = lambda x: -x[0])
+            best_r_index = Counter(i for _, i in (residuos*free_seats)[:free_seats])
+            
+            for i, option in enumerate(options):
+                res.append({
+                    **option,
+                    'postproc': escanos_cociente [i] + best_r_index[i] if i in best_r_index else escanos_cociente [i],
+                })
 
-                    opcionMasVotosResiduo = options[0]
-                    opcionMasVotosResiduo.update({
-                    'postproc' : opcionMasVotosResiduo['postproc'] + 1})
-                    escanosAsig += 1
-
-                    for i in options:
-                        i.pop('escanosRes')
-                options.sort(key=lambda x : -x['postproc'])
-            else:
-                escanosAsigQ= 0
-                for x in options:
-                    escanosQ= math.trunc(numEscanos/ len(options))
-                    x.update({'postproc' : escanosQ}) 
-                    escanosAsigQ += x['postproc']
-                
-                if escanosAsigQ < numEscanos:
-                    for x in options:
-                        options.sort(key=lambda x : -x['votes'])
-                    options[0].update({'postproc' : options[0]['postproc']+1})
-            return Response(options)
+            res.sort(key=lambda x: (-x['postproc'], -x['votes']))
+            return Response(res)
         else:
             for x in options:
                 x.update({'postproc' : 0})
