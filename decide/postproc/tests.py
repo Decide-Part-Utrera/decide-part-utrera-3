@@ -809,7 +809,7 @@ class TestPruebaDHont(StaticLiveServerTestCase):
         user1.save()
         census1 = Census(voting_id=voting1.id, voter_id=user1.id)
         census1.save()
-        '''
+'''
         #response = self.driver.get(f'{self.live_server_url}/booth/{voting1.id}/')
         # time.sleep(5)
         # self.driver.find_element(By.ID, "username").send_keys("usertest1")
