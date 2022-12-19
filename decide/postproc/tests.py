@@ -843,3 +843,65 @@ class PostProcTestCase(APITestCase):
 
         values = response.json()
         self.assertEqual(values, expected_result)
+    
+    def test_hare_04(self):
+        data = {
+            'type': 'HARE',
+            'numEscanos': 22,
+            'options': [
+                { 'option': 'Policital party 1', 'number': 1, 'votes': 2659 },
+                { 'option': 'Policital party 2', 'number': 2, 'votes': 0 },
+                { 'option': 'Policital party 3', 'number': 3, 'votes': 0 },
+                { 'option': 'Policital party 4', 'number': 4, 'votes': 0 },
+                { 'option': 'Policital party 5', 'number': 5, 'votes': 0 },
+                { 'option': 'Policital party 6', 'number': 6, 'votes': 2659 },
+            ]
+        }
+
+        expected_result = [
+            { 'option': 'Policital party 1', 'number': 1, 'votes': 2659, 'postproc': 11 },
+            { 'option': 'Policital party 6', 'number': 6, 'votes': 2659, 'postproc': 11 },
+            { 'option': 'Policital party 2', 'number': 2, 'votes': 0, 'postproc': 0 },
+            { 'option': 'Policital party 3', 'number': 3, 'votes': 0, 'postproc': 0 },
+            { 'option': 'Policital party 4', 'number': 4, 'votes': 0, 'postproc': 0 },
+            { 'option': 'Policital party 5', 'number': 5, 'votes': 0, 'postproc': 0 },
+            
+        ]
+
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
+
+    
+
+    def test_hare_05(self):
+        data = {
+            'type': 'HARE',
+            'numEscanos': 21,
+            'options': [
+                { 'option': 'Policital party 1', 'number': 1, 'votes': 2659 },
+                { 'option': 'Policital party 2', 'number': 2, 'votes': 0 },
+                { 'option': 'Policital party 3', 'number': 3, 'votes': 0 },
+                { 'option': 'Policital party 4', 'number': 4, 'votes': 0 },
+                { 'option': 'Policital party 5', 'number': 5, 'votes': 0 },
+                { 'option': 'Policital party 6', 'number': 6, 'votes': 0 },
+            ]
+            
+        }
+
+        expected_result = [
+            { 'option': 'Policital party 1', 'number': 1, 'votes': 2659, 'postproc': 21 },
+            { 'option': 'Policital party 2', 'number': 2, 'votes': 0, 'postproc': 0 },
+            { 'option': 'Policital party 3', 'number': 3, 'votes': 0, 'postproc': 0 },
+            { 'option': 'Policital party 4', 'number': 4, 'votes': 0, 'postproc': 0 },
+            { 'option': 'Policital party 5', 'number': 5, 'votes': 0, 'postproc': 0 },
+            { 'option': 'Policital party 6', 'number': 6, 'votes': 0, 'postproc': 0 },
+        ]
+
+        response = self.client.post('/postproc/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        values = response.json()
+        self.assertEqual(values, expected_result)
