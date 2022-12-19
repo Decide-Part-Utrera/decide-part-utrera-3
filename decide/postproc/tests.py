@@ -8,13 +8,19 @@ import datetime
 from base.tests import BaseTestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.contrib.auth.models import User
-from selenium.webdriver.chrome.options import Options
+import time
+import json
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 
 from census.models import Census
-from voting.models import Voting, Question
+from voting.models import Voting, Question, QuestionOption
+from store.models import Vote
 from django.utils import timezone
+import booth
 
 from base import mods
 
@@ -736,14 +742,14 @@ class PostProcTestCase(APITestCase):
         values = response.json()
         self.assertEqual(values, expected_result) 
 
-class DHontTest(StaticLiveServerTestCase):
-    
+class TestPruebaDHont(StaticLiveServerTestCase):
     def setUp(self):
         #Load base test functionality for decide
         self.base = BaseTestCase()
         self.base.setUp()
 
         options = webdriver.ChromeOptions()
+        #options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()            
@@ -753,33 +759,130 @@ class DHontTest(StaticLiveServerTestCase):
         self.driver.quit()
 
         self.base.tearDown()
-
-    def crear_votacion(self):
-        question1 = Question(desc="Pregunta de prueba", question_opt=['Opcion 1', 'Opcion 2'])
+  
+    def test_prueba(self):
+        question1 = Question(desc="Pregunta de prueba DHont")
         question1.save()
-        voting1 = Voting(name="Voting prueba", desc="Esto es un voting de prueba", question=question1, numEscanos=50, tipo="DHONT", start_date=timezone.now())
+        opcion1 = QuestionOption(question=question1, number=1, option="Opción 1")
+        opcion1.save()
+        opcion2 = QuestionOption(question=question1, number=2, option="Opción 2")
+        opcion2.save()
+        voting1 = Voting(name="Voting prueba DHont", desc="Esto es un voting de prueba DHont", question=question1, numEscanos=50, tipo="DHONT", start_date = timezone.now())
         voting1.save()
-        response =self.driver.get(f'{self.live_server_url}/visualizer/{voting1.id}/')
+        user1 = User(username="usertest1")
+        user1.set_password("test1234")
+        user1.save()
+        census1 = Census(voting_id=voting1.id, voter_id=user1.id)
+        census1.save()
+        '''
+        #response = self.driver.get(f'{self.live_server_url}/booth/{voting1.id}/')
+        time.sleep(5)
+        self.driver.find_element(By.ID, "username").send_keys("usertest1")
+        self.driver.find_element(By.ID, "password").send_keys("test1234")
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+        self.driver.find_element(By.ID, "q2").click()
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+        '''
+        '''
+        response = self.driver.get(f'{self.live_server_url}/admin/')
+        self.driver.find_element(By.ID, "id_username").send_keys('decide')
+        self.driver.find_element(By.ID, "id_password").send_keys('complexpassword')
+        self.driver.find_element(By.CSS_SELECTOR, ".submit-row > input").click()
+        time.sleep(5)
+        self.driver.find_element(By.LINK_TEXT, "Censuss").click()
+        self.driver.find_element(By.ID, "content-main").click()
+        self.driver.find_element(By.CSS_SELECTOR, ".addlink").click()
+        self.driver.find_element(By.ID, "id_voting_id").send_keys(voting1.id)
+        self.driver.find_element(By.ID, "id_voter_id").click()
+        self.driver.find_element(By.ID, "id_voter_id").send_keys("1")
+        self.driver.find_element(By.CSS_SELECTOR, ".field-voter_id > div").click()
+        self.driver.find_element(By.NAME, "_save").click()
+        self.driver.find_element(By.LINK_TEXT, "Home").click()
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.NAME, "_selected_action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
+        element = self.driver.find_element(By.NAME, "action")
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).click_and_hold().perform()
+        element = self.driver.find_element(By.NAME, "action")
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).perform()
+        element = self.driver.find_element(By.NAME, "action")
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).release().perform()
+        self.driver.find_element(By.NAME, "index").click()
+        self.driver.find_element(By.ID, "username").send_keys("decide")
+        self.driver.find_element(By.ID, "password").send_keys("complexpassword")
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+        self.driver.find_element(By.ID, "q2").click()
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.NAME, "_selected_action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Stop']").click()
+        element = self.driver.find_element(By.NAME, "action")
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).click_and_hold().perform()
+        element = self.driver.find_element(By.NAME, "action")
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).perform()
+        element = self.driver.find_element(By.NAME, "action")
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).release().perform()
+        self.driver.find_element(By.NAME, "index").click()
+        self.driver.find_element(By.NAME, "_selected_action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Tally']").click()
+        element = self.driver.find_element(By.NAME, "action")
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).click_and_hold().perform()
+        element = self.driver.find_element(By.NAME, "action")
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).perform()
+        element = self.driver.find_element(By.NAME, "action")
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).release().perform()
+        self.driver.find_element(By.NAME, "index").click()
+        self.driver.find_element(By.CSS_SELECTOR, "a:nth-child(4)").click()
+        self.driver.close()
+        '''
+        response = self.driver.get(f'{self.live_server_url}/visualizer/{voting1.id}/')
         vState= self.driver.find_element(By.TAG_NAME,"h2").text
         self.assertTrue(vState, "Votación en curso")
 
-    '''
-    def votacion_positiva(self):
-        question1 = Question(desc="Pregunta de prueba", question_opt=['Opcion 1', 'Opcion 2'])
+class TestPruebaImperiali(StaticLiveServerTestCase):
+    def setUp(self):
+        #Load base test functionality for decide
+        self.base = BaseTestCase()
+        self.base.setUp()
+
+        options = webdriver.ChromeOptions()
+        #options.headless = True
+        self.driver = webdriver.Chrome(options=options)
+
+        super().setUp()            
+            
+    def tearDown(self):           
+        super().tearDown()
+        self.driver.quit()
+
+        self.base.tearDown()
+  
+    def test_prueba(self):
+        question1 = Question(desc="Pregunta de prueba Imperiali")
         question1.save()
-        voting1 = Voting(name="Voting prueba", desc="Esto es un voting de prueba", question=question1, numEscanos=50, tipo="DHONT", start_date=timezone.now())
+        opcion1 = QuestionOption(question=question1, number=1, option="Opción A")
+        opcion1.save()
+        opcion2 = QuestionOption(question=question1, number=2, option="Opción B")
+        opcion2.save()
+        voting1 = Voting(name="Voting prueba Imperiali", desc="Esto es un voting de prueba para Imperiali", question=question1, numEscanos=50, tipo="IMPERIALI", start_date = timezone.now())
         voting1.save()
-        voter1 = User(username="votertest1")
-        voter1.set_password("test1234")
-        voter1.save()
-        census1 = Census(voting_id=voting1.id, voter_id=voter1.id)
+        user1 = User(username="usertest1")
+        user1.set_password("test1234")
+        user1.save()
+        census1 = Census(voting_id=voting1.id, voter_id=user1.id)
         census1.save()
-        self.driver.get(f'{self.live_server_url}/booth/{voting1.id}')
-        username = self.driver.find_element_by_name("username")
-        password = self.driver.find_element_by_name("password")
-        submit = self.driver.find_element_by_name("submit")
-        username.send_keys('admin')
-        password.send_keys('qwerty')
-        submit.click()
-        time.sleep(5)
-        '''
+        response = self.driver.get(f'{self.live_server_url}/visualizer/{voting1.id}/')
+        vState= self.driver.find_element(By.TAG_NAME,"h2").text
+        self.assertTrue(vState, "Votación en curso")
