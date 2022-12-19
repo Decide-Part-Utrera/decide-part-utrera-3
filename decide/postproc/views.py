@@ -101,14 +101,7 @@ class PostProcView(APIView):
                 x.update({'postproc' : 0})
             return Response(options)
 
-    def hare(self, options, numEscanos):
-        out = []
-
-        e, r = [], []
-        sum_e = 0
-        m = sum([opt['votes'] for opt in options])
-        q = round(m/numEscanos, 3)
-
+    def function_hare_droop(self, options, numEscanos, q, e, r, sum_e, out):
         for i, opt in enumerate(options):
             ei = math.floor(opt['votes'] / q)
             ri = opt['votes'] - q*ei
@@ -129,6 +122,17 @@ class PostProcView(APIView):
         out.sort(key=lambda x: (-x['postproc'], -x['votes']))
         return Response(out)
 
+    def hare(self, options, numEscanos):
+        out = []
+
+        e, r = [], []
+        sum_e = 0
+        m = sum([opt['votes'] for opt in options])
+        q = round(m/numEscanos, 3)
+
+        return self.function_hare_droop(options, numEscanos, q, e, r. sum_e, out)
+
+
     def droop(self, options, numEscanos):
         out = []
 
@@ -137,25 +141,7 @@ class PostProcView(APIView):
         m = sum([opt['votes'] for opt in options])
         q = round(1 + m / (numEscanos + 1))
 
-        for i, opt in enumerate(options):
-            ei = math.floor(opt['votes'] / q)
-            ri = opt['votes'] - q*ei
-            e.append(ei)
-            r.append((ri, i))
-            sum_e += ei
-
-        k = numEscanos - sum_e
-        r.sort(key = lambda x: -x[0])
-        best_r_index = Counter(i for _, i in (r*k)[:k])
-        
-        for i, opt in enumerate(options):
-            out.append({
-                **opt,
-                'postproc': e[i] + best_r_index[i] if i in best_r_index else e[i],
-            })
-
-        out.sort(key=lambda x: (-x['postproc'], -x['votes']))
-        return Response(out)   
+        return self.function_hare_droop(options, numEscanos, q, e, r, sum_e, out)
 
     def post(self, request):
         """
