@@ -44,7 +44,7 @@ jobs:
         coverage run --branch --source=. ./manage.py test  --keepdb 
         coverage xml 
     - name: Codacy Coverage Reporter
-      if: step.test.outcome == 'success'
+      if: steps.test.outcome == 'success'
       uses: codacy/codacy-coverage-reporter-action@v1
       with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
